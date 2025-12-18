@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
-
+#include <sys/time.h>
+#include <time.h>
 
 void	philo_init(t_data *args)
 {
@@ -16,93 +16,127 @@ void	philo_init(t_data *args)
 	{
 		args->philo[i].id = i + 1;
 		args->philo[i].meals_eaten = 0;
+		args->philo[i].last_meal_time = args->start_time;
+		args->philo[i].data = args;
+		args->philo[i].print_status = &args->print_status;
+		args->philo[i].death_mutex = &args->death_mutex;
 		pthread_mutex_init(&args->fork[i], NULL);
 		args->philo[i].l_fork = &args->fork[i];
 		args->philo[i].r_fork = &args->fork[(i + 1) % args->philo_num];
-		args->philo[i].print_status = &args->print_status;
-		args->philo[i].death_mutex = &args->death_mutex;
 		i++;
 	}
-	printf("done init\n");
 }
 
-void	*print_status(t_philos *philo, char *s)
+void	print_status(t_philos *philo, char *s)
 {
 	pthread_mutex_lock(philo->print_status);
-	printf("Philo %d %s", philo_id, s);
+	printf("Philo %d %s", philo->id, s);
+	pthread_mutex_unlock(philo->print_status);
 }
 
-// void	*routine
+// void	death_mutex(t_data *args)
+// {
+// 	int	i;
+
+// 	pthread_mutex_lock(philo->death_mutex);
+// 	i = 0;
+
+// }
+
+int	is_alive(t_philos *philo)
+{
+	int	current;
+	int	compare;
+	int	result;
+
+	pthread_mutex_lock(philo->death_mutex);
+	current = get_time_ms();
+	compare = philo->last_meal_time;
+	result = current - compare;
+	if (result > philo->data->t_die)
+	{
+		pthread_mutex_unlock(philo->death_mutex);
+		return (0);
+	}
+	else
+	{
+		pthread_mutex_unlock(philo->death_mutex);
+		return (1);
+	}
+}
+
+void	*routine(t_philos *philo)
+{
+	printf("Hi,I am philo %d\n", philo->id);
+	if ((philo->id % 2) == 0)
+		usleep(1000);
+	while (is_alive(philo))
+	{
+
+		printf("omg im alive, my id is %d\n", philo->id);
+		philo->counter++;
+	}
+	if (!is_alive(philo))
+	{
+		printf("gg im dead, my id is %d\n", philo->id);
+		printf("id = %d, printed times = %d\n", philo->id, philo->counter);
+	}
+	return (NULL);
+}
+
+int	get_time_ms(void)
+{
+	struct timeval	time;
+
+	gettimeofday(&time, NULL);
+	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+}
 
 int	start_sim(t_data *args)
 {
-	pthread_t		*philos; //thread
-	pthread_mutex_t	*forks;
 	int				i;
 
-	philos = malloc(sizeof(pthread_t) * args->philo_num);
-	forks = malloc(sizeof(pthread_mutex_t) * (args->philo_num));
+	printf("\n---start sim---\n");
+	args->philo = malloc(sizeof(t_philos) * (args->philo_num));
+	args->fork = malloc(sizeof(pthread_mutex_t) * (args->philo_num));
+	args->start_time = get_time_ms();
 	philo_init(args);
+	printf("done init\n");
 	i = 0;
 	while (i < args->philo_num)
 	{
+		printf("creating threads\n");
 		if (args->philo_num == 1)
 			return (0);
-		pthread_create(&philos[i], NULL, routine, NULL);
+		pthread_create(&args->philo[i].thread_id, NULL, (void *)routine, &args->philo[i]);
 		i++;
 	}
 	i = 0;
 	while (i < args->philo_num)
-		pthread_join(philos[i++], NULL);
+	{
+		pthread_join(args->philo[i].thread_id, NULL);
+		i++;
+	}
+	printf("\n---stopping simulator---\n");
+	printf("end\n");
+	return (1);
 }
 
 int	main(int ac, char **av)
 {
-	t_data	args;
+	t_data	*args;
 
-	if (!parsing_check(ac, av, &args))
+	args = malloc(sizeof(t_data));
+	if (!parsing_check(ac, av, args))
 	{
 		perror("parsing error");
 		return (1);
 	}
-	if (!(start_sim(&args)))
+	if (!(start_sim(args)))
 	{
 		perror("start simulation error");
 		return (1);
 	}
+	printf("end\n");
 	return (0);
-}
-
-void	atoi_num(char **av, t_data *args)
-{
-	args->philo_num = ft_atoi(av[1]); // already guaranteed num
-	args->t_die = ft_atoi(av[2]);
-	args->t_sleep = ft_atoi(av[3]);
-	args->t_eat = ft_atoi(av[4]);
-	if (av[5])
-	{
-		args->eat_num = ft_atoi(av[5]);
-		printf ("philo num = %d\ntime to die = %d\ntime to sleep = %d\ntime to eat = %d\ntimes to eat = %d\n", args->philo_num, args->t_die, args->t_sleep, args->t_eat, args->eat_num);
-	}
-	else
-	{
-		args->eat_num = -1;
-		printf ("philo num = %d\ntime to die = %d\ntime to sleep = %d\ntime to eat = %d\ntimes to eat = optional\n", args->philo_num, args->t_die, args->t_sleep, args->t_eat);
-	}
-}
-
-int	parsing_check(int ac, char **av, t_data *args)
-{
-	if (ac < 5 || ac > 6)
-	{
-		printf("Error, Usage: <num_of_philo> <time_to_die> <time_to_eat> <time_to_sleep> <number_of_times_to_eat>\n");
-		return (0);
-	}
-	if (!(check_num(av)))
-	{
-		printf("error: invalid num detected\n");
-		return (0);
-	}
-	atoi_num(av, args);
-	return (1);
 }

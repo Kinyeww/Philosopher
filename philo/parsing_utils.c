@@ -1,6 +1,8 @@
 #include "philosopher.h"
+#include <stdlib.h>
+#include <stdio.h>
 
-int	ft_atoi(char *s)
+static int	ft_atoi(char *s)
 {
 	int	res;
 	int	sign;
@@ -43,5 +45,39 @@ int	check_num(char **av)
 			return (0);
 		i++;
 	}
+	return (1);
+}
+
+void	atoi_num(char **av, t_data *args)
+{
+	args->philo_num = ft_atoi(av[1]);
+	args->t_die = ft_atoi(av[2]);
+	args->t_sleep = ft_atoi(av[3]);
+	args->t_eat = ft_atoi(av[4]);
+	if (av[5])
+	{
+		args->eat_num = ft_atoi(av[5]);
+		printf ("philo num = %d\ntime to die = %d\ntime to sleep = %d\ntime to eat = %d\ntime to eat = %d\n", args->philo_num, args->t_die, args->t_sleep, args->t_eat, args->eat_num);
+	}
+	else
+	{
+		args->eat_num = -1;
+		printf ("philo num = %d\ntime to die = %d\ntime to sleep = %d\ntime to eat = %d\ntime to eat = optional\n", args->philo_num, args->t_die, args->t_sleep, args->t_eat);
+	}
+}
+
+int	parsing_check(int ac, char **av, t_data *args)
+{
+	if (ac < 5 || ac > 6)
+	{
+		printf("Error, Usage: <num_of_philo> <time_to_die> <time_to_eat> <time_to_sleep> <number_of_times_to_eat>\n");
+		return (0);
+	}
+	if (!(check_num(av)))
+	{
+		printf("error: invalid num detected\n");
+		return (0);
+	}
+	atoi_num(av, args);
 	return (1);
 }

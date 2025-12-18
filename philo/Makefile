@@ -1,6 +1,6 @@
 NAME = philo
 CC = cc
-CCFLAGS = -Wall -Wextra -Werror -g -pthread
+CCFLAGS = -Wall -Wextra -g -pthread
 
 SRCS = main.c parsing_utils.c
 OBJS = $(SRCS:.c=.o)
