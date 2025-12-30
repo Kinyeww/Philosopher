@@ -62,7 +62,7 @@ void	atoi_num(char **av, t_data *args)
 	else
 	{
 		args->eat_num = -1;
-		printf ("philo num = %d\ntime to die = %d\ntime to sleep = %d\ntime to eat = %d\ntime to eat = optional\n", args->philo_num, args->t_die, args->t_sleep, args->t_eat);
+		printf ("philo num = %d\ntime to die = %d\ntime to sleep = %d\ntime to eat = %d\ntime to eat = %d(optional)\n", args->philo_num, args->t_die, args->t_sleep, args->t_eat, args->eat_num);
 	}
 }
 
