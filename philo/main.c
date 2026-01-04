@@ -76,15 +76,29 @@ void	*monitoring_thread(t_data *args)
 
 void	philo_eat(t_philos *philo)
 {
+	long	elapsed_time;
+	long	start_time;
+
+	elapsed_time = get_time_ms();
+	start_time = get_time_ms();
 	pthread_mutex_lock(philo->l_fork);
 	pthread_mutex_lock(philo->r_fork);
 	print_status(philo, "has taken a fork\n\n");
 	print_status(philo, "has taken a fork\n\n");
 	print_status(philo, "is eating\n\n");
-	pthread_mutex_lock(philo->death_mutex);
+	while (elapsed_time - start_time < philo->data->t_eat)
+	{
+		pthread_mutex_lock(philo->death_mutex);
+		if (philo->data->deadbool == 1)
+		{
+			pthread_mutex_unlock(philo->death_mutex);
+			return ;
+		}
+		pthread_mutex_unlock(philo->death_mutex);
+		usleep(100);
+		elapsed_time = get_time_ms();
+	}
 	philo->last_meal_time = get_time_ms();
-	pthread_mutex_unlock(philo->death_mutex);
-	usleep(philo->data->t_eat * 1000);
 	pthread_mutex_unlock(philo->l_fork);
 	pthread_mutex_unlock(philo->r_fork);
 }
@@ -106,6 +120,7 @@ void	philo_sleep(t_philos *philo)
 			return ;
 		}
 		pthread_mutex_unlock(philo->death_mutex);
+		usleep(100);
 		elapsed_time = get_time_ms();
 	}
 }
@@ -120,7 +135,7 @@ void	*routine(t_philos *philo)
 	int	counter;
 
 	if ((philo->id % 2) == 0)
-		usleep(1000);
+		usleep(100);
 	counter = 0;
 	while ((philo->data->eat_num == -1 || counter < philo->data->eat_num ))
 	{
@@ -138,7 +153,7 @@ void	*routine(t_philos *philo)
 	}
 	if (philo->data->deadbool == 1)
 	{
-		printf("dead liao, id = %d stopping now\n", philo->id);
+		printf("dead liao, id = %d stopping now, looped = %d\n", philo->id, counter);
 	}
 	return (NULL);
 }
