@@ -32,9 +32,14 @@ void	print_status(t_philos *philo, char *s)
 	long	now;
 
 	pthread_mutex_lock(philo->print_status);
+	if (philo->data->deadbool == 1)
+	{
+		pthread_mutex_unlock(philo->print_status);
+		return ;
+	}
 	now = get_time_ms();
 	philo->current_time = now - (philo->data->start_time);
-	printf("%ld Philo %d %s", philo->current_time, philo->id, s);
+	printf("%ld ms, Philo %d %s", philo->current_time, philo->id, s);
 	pthread_mutex_unlock(philo->print_status);
 }
 
@@ -49,13 +54,15 @@ void	*monitoring_thread(t_data *args)
 	printf("monitoring thread init\n");
 	while (1)
 	{
+		if (i == args->philo_num)
+			i = 0;
 		pthread_mutex_lock(args->philo[i].death_mutex);
 		current = get_time_ms();
 		compare = args->philo[i].last_meal_time;
 		result = current - compare;
 		if (result > (long)args->philo[i].data->t_die)
 		{
-			printf("last eat time = %ld\n", result);
+			printf("last eat time = %ldms, need within %dms\n", result, args->t_die);
 			print_status(&args->philo[i], "\x1B[31mis dead\n\x1B[0m");
 			args->deadbool = 1;
 			pthread_mutex_unlock(args->philo[i].death_mutex);
@@ -84,8 +91,23 @@ void	philo_eat(t_philos *philo)
 
 void	philo_sleep(t_philos *philo)
 {
+	long	start_time;
+	long	elapsed_time;
+
+	start_time = get_time_ms();
+	elapsed_time = get_time_ms();
 	print_status(philo, "is sleeping\n\n");
-	usleep(philo->data->t_sleep * 1000);
+	while (elapsed_time - start_time < philo->data->t_sleep)
+	{
+		pthread_mutex_lock(philo->death_mutex);
+		if (philo->data->deadbool == 1)
+		{
+			pthread_mutex_unlock(philo->death_mutex);
+			return ;
+		}
+		pthread_mutex_unlock(philo->death_mutex);
+		elapsed_time = get_time_ms();
+	}
 }
 
 void	philo_think(t_philos *philo)
@@ -97,11 +119,10 @@ void	*routine(t_philos *philo)
 {
 	int	counter;
 
-	printf("Hi,I am philo %d\n", philo->id);
 	if ((philo->id % 2) == 0)
 		usleep(1000);
 	counter = 0;
-	while (philo->data->eat_num == -1 || counter < philo->data->eat_num)
+	while ((philo->data->eat_num == -1 || counter < philo->data->eat_num ))
 	{
 		pthread_mutex_lock(philo->death_mutex);
 		if (philo->data->deadbool == 1)
@@ -115,8 +136,9 @@ void	*routine(t_philos *philo)
 		philo_think(philo);
 		counter++;
 	}
-	if (philo->data->deadbool)
+	if (philo->data->deadbool == 1)
 	{
+		printf("dead liao, id = %d stopping now\n", philo->id);
 	}
 	return (NULL);
 }
