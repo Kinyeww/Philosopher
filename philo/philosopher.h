@@ -9,6 +9,7 @@ typedef struct s_philos
 {
 	int				id;
 	int				meals_eaten;
+	int				counter;
 	long			last_meal_time;
 	long			current_time;
 	pthread_t		thread_id;
@@ -36,7 +37,7 @@ typedef struct s_data
 }	t_data;
 
 /* parsing */
-void	atoi_num(char **av, t_data *args);
+int		atoi_num(char **av, t_data *args);
 int		parsing_check(int ac, char **av, t_data *args);
 int		check_num(char **av);
 long	get_time_ms(void);

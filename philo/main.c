@@ -51,11 +51,12 @@ void	*monitoring_thread(t_data *args)
 	int		i;
 
 	i = 0;
-	printf("monitoring thread init\n");
 	while (1)
 	{
 		if (i == args->philo_num)
 			i = 0;
+		if (args->philo[i].counter == args->eat_num)
+			return (NULL);
 		pthread_mutex_lock(&args->death_mutex);
 		current = get_time_ms();
 		pthread_mutex_lock(&args->meal_time_mutex);
@@ -65,7 +66,7 @@ void	*monitoring_thread(t_data *args)
 		if (result > (long)args->philo[i].data->t_die)
 		{
 			printf("last eat time = %ldms, need within %dms\n", result, args->t_die);
-			print_status(&args->philo[i], "\x1B[31mis dead\n\x1B[0m");
+			printf("\x1B[31m%d is dead\n\x1B[0m", args->philo[i].id);
 			args->deadbool = 1;
 			pthread_mutex_unlock(args->philo[i].death_mutex);
 			return (NULL);
@@ -78,12 +79,9 @@ void	*monitoring_thread(t_data *args)
 
 void	*routine(t_philos *philo)
 {
-	int	counter;
-
 	if ((philo->id % 2) == 0)
 		usleep(100);
-	counter = 0;
-	while ((philo->data->eat_num == -1 || counter < philo->data->eat_num ))
+	while ((philo->data->eat_num == -1 || philo->counter < philo->data->eat_num ))
 	{
 		pthread_mutex_lock(philo->death_mutex);
 		if (philo->data->deadbool == 1)
@@ -95,13 +93,15 @@ void	*routine(t_philos *philo)
 		philo_eat(philo);
 		philo_sleep(philo);
 		philo_think(philo);
-		counter++;
+		// printf("id = %d, eaten = %d\n", philo->id, counter);
+		philo->counter++;
+		usleep(10);
 	}
 	// if (philo->data->deadbool == 1)
 	// {
 	// 	printf("dead liao, id = %d stopping now, looped = %d\n", philo->id, counter);
 	// }
-	printf("end\n");
+	// printf("end\n");
 	return (NULL);
 }
 
@@ -122,7 +122,6 @@ int	start_sim(t_data *args)
 	args->fork = malloc(sizeof(pthread_mutex_t) * (args->philo_num));
 	args->start_time = get_time_ms();
 	philo_init(args);
-	// printf("done init\n");
 	i = 0;
 	while (i < args->philo_num)
 	{
@@ -134,12 +133,12 @@ int	start_sim(t_data *args)
 	while (i < args->philo_num)
 	{
 		pthread_join(args->philo[i].thread_id, NULL);
-		printf("ending\n");
+		// printf("ending\n");
 		i++;
 	}
 	pthread_join(args->monitoring, NULL);
 	printf("\n---stopping simulator---\n");
-	printf("end\n");
+	printf("ended\n");
 	return (1);
 }
 
@@ -158,6 +157,5 @@ int	main(int ac, char **av)
 		perror("start simulation error");
 		return (1);
 	}
-	printf("end\n");
 	return (0);
 }
