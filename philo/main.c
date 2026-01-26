@@ -73,15 +73,18 @@ void	*monitoring_thread(t_data *args)
 		}
 		pthread_mutex_unlock(args->philo[i].death_mutex);
 		i++;
-		usleep (100);
+		usleep (50);
 	}
 }
 
 void	*routine(t_philos *philo)
 {
+	int	eatnum;
+
+	eatnum = philo->data->eat_num;
 	if ((philo->id % 2) == 0)
 		usleep(100);
-	while ((philo->data->eat_num == -1 || philo->counter < philo->data->eat_num ))
+	while ((eatnum == -1 || philo->counter < eatnum ))
 	{
 		pthread_mutex_lock(philo->death_mutex);
 		if (philo->data->deadbool == 1)
@@ -93,15 +96,9 @@ void	*routine(t_philos *philo)
 		philo_eat(philo);
 		philo_sleep(philo);
 		philo_think(philo);
-		// printf("id = %d, eaten = %d\n", philo->id, counter);
 		philo->counter++;
 		usleep(10);
 	}
-	// if (philo->data->deadbool == 1)
-	// {
-	// 	printf("dead liao, id = %d stopping now, looped = %d\n", philo->id, counter);
-	// }
-	// printf("end\n");
 	return (NULL);
 }
 
@@ -125,7 +122,8 @@ int	start_sim(t_data *args)
 	i = 0;
 	while (i < args->philo_num)
 	{
-		pthread_create(&args->philo[i].thread_id, NULL, (void *)routine, &args->philo[i]);
+		pthread_create(&args->philo[i].thread_id, \
+NULL, (void *)routine, &args->philo[i]);
 		i++;
 	}
 	pthread_create(&args->monitoring, NULL, (void *)monitoring_thread, args);
@@ -133,7 +131,6 @@ int	start_sim(t_data *args)
 	while (i < args->philo_num)
 	{
 		pthread_join(args->philo[i].thread_id, NULL);
-		// printf("ending\n");
 		i++;
 	}
 	pthread_join(args->monitoring, NULL);
