@@ -1,0 +1,2 @@
+failed on ./philo 4 410 300 100 10 (no one die, 1 should be dead)
+failed on 199 philos

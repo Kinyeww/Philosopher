@@ -97,7 +97,7 @@ void	*routine(t_philos *philo)
 		philo_sleep(philo);
 		philo_think(philo);
 		philo->counter++;
-		usleep(10);
+		usleep(1000);
 	}
 	return (NULL);
 }
