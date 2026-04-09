@@ -6,12 +6,22 @@ void	philo_eat(t_philos *philo)
 	long	elapsed_time;
 	long	start_time;
 
-	pthread_mutex_lock(philo->l_fork);
-	pthread_mutex_lock(philo->r_fork);
+	if (philo->id % 2 == 0)
+	{
+		pthread_mutex_lock(philo->l_fork);
+		print_status(philo, "has taken a fork\n\n");
+		pthread_mutex_lock(philo->r_fork);
+		print_status(philo, "has taken a fork\n\n");
+	}
+	else
+	{
+		pthread_mutex_lock(philo->r_fork);
+		print_status(philo, "has taken a fork\n\n");
+		pthread_mutex_lock(philo->l_fork);
+		print_status(philo, "has taken a fork\n\n");
+	}
 	elapsed_time = get_time_ms();
 	start_time = get_time_ms();
-	print_status(philo, "has taken a fork\n\n");
-	print_status(philo, "has taken a fork\n\n");
 	print_status(philo, "is eating\n\n");
 	while (elapsed_time - start_time < philo->data->t_eat)
 	{
