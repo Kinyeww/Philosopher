@@ -12,6 +12,8 @@ void	philo_init(t_data *args)
 	i = 0;
 	pthread_mutex_init(&args->death_mutex, NULL);
 	pthread_mutex_init(&args->meal_time_mutex, NULL);
+	pthread_mutex_init(&args->counter_mutex, NULL);
+	pthread_mutex_init(&args->print_mutex, NULL);
 	while (i < args->philo_num)
 	{
 		args->philo[i].id = i + 1;
@@ -40,7 +42,9 @@ void	print_status(t_philos *philo, char *s)
 	pthread_mutex_unlock(philo->death_mutex);
 	now = get_time_ms();
 	philo->current_time = now - (philo->data->start_time);
+	pthread_mutex_lock(&philo->data->print_mutex);
 	printf("%ld %d %s", philo->current_time, philo->id, s);
+	pthread_mutex_unlock(&philo->data->print_mutex);
 }
 
 void	*monitoring_thread(t_data *args)
@@ -55,8 +59,13 @@ void	*monitoring_thread(t_data *args)
 	{
 		if (i == args->philo_num)
 			i = 0;
+		pthread_mutex_lock(&args->counter_mutex);
 		if (args->philo[i].counter == args->eat_num)
+		{
+			pthread_mutex_unlock(&args->counter_mutex);
 			return (NULL);
+		}
+		pthread_mutex_unlock(&args->counter_mutex);
 		pthread_mutex_lock(&args->death_mutex);
 		current = get_time_ms();
 		pthread_mutex_lock(&args->meal_time_mutex);
@@ -65,9 +74,11 @@ void	*monitoring_thread(t_data *args)
 		pthread_mutex_unlock(&args->meal_time_mutex);
 		if (result > (long)args->philo[i].data->t_die)
 		{
+			pthread_mutex_lock(&args->print_mutex);
 			printf("last eat time = %ldms, need within %dms\n", result, args->t_die);
 			printf("\x1B[31m%d is dead\n\x1B[0m", args->philo[i].id);
 			args->deadbool = 1;
+			pthread_mutex_unlock(&args->print_mutex);
 			pthread_mutex_unlock(args->philo[i].death_mutex);
 			return (NULL);
 		}
@@ -94,9 +105,11 @@ void	*routine(t_philos *philo)
 		}
 		pthread_mutex_unlock(philo->death_mutex);
 		philo_eat(philo);
+		pthread_mutex_lock(&philo->data->counter_mutex);
+		philo->counter++;
+		pthread_mutex_unlock(&philo->data->counter_mutex);
 		philo_sleep(philo);
 		philo_think(philo);
-		philo->counter++;
 		usleep(1000);
 	}
 	return (NULL);
@@ -123,7 +136,7 @@ int	start_sim(t_data *args)
 	while (i < args->philo_num)
 	{
 		pthread_create(&args->philo[i].thread_id, \
-NULL, (void *)routine, &args->philo[i]);
+NULL, routine, &args->philo[i]);
 		i++;
 	}
 	pthread_create(&args->monitoring, NULL, (void *)monitoring_thread, args);

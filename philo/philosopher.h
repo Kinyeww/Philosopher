@@ -31,6 +31,8 @@ typedef struct s_data
 	long			start_time;
 	pthread_mutex_t	death_mutex;
 	pthread_mutex_t	meal_time_mutex;
+	pthread_mutex_t	counter_mutex;
+	pthread_mutex_t	print_mutex;
 	t_philos		*philo;
 	pthread_mutex_t	*fork;
 	pthread_t		monitoring;
