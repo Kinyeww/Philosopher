@@ -139,7 +139,7 @@ int	start_sim(t_data *args)
 NULL, routine, &args->philo[i]);
 		i++;
 	}
-	pthread_create(&args->monitoring, NULL, (void *)monitoring_thread, args);
+	pthread_create(&args->monitoring, NULL, monitoring_thread, args);
 	i = 0;
 	while (i < args->philo_num)
 	{
