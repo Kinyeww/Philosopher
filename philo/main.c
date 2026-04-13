@@ -19,6 +19,7 @@ void	philo_init(t_data *args)
 		args->philo[i].id = i + 1;
 		args->philo[i].meals_eaten = 0;
 		args->philo[i].last_meal_time = args->start_time;
+		args->philo[i].counter = 0;
 		args->philo[i].data = args;
 		args->philo[i].meal_time_mutex = &args->meal_time_mutex;
 		args->philo[i].death_mutex = &args->death_mutex;
@@ -43,7 +44,7 @@ void	print_status(t_philos *philo, char *s)
 	now = get_time_ms();
 	philo->current_time = now - (philo->data->start_time);
 	pthread_mutex_lock(&philo->data->print_mutex);
-	printf("%ld %d %s", philo->current_time, philo->id, s);
+	printf("%ld %d %s\n\n", philo->current_time, philo->id, s);
 	pthread_mutex_unlock(&philo->data->print_mutex);
 }
 
@@ -88,15 +89,24 @@ void	*monitoring_thread(t_data *args)
 	}
 }
 
-void	*routine(t_philos *philo)
+void	*routine(void *arg)
 {
 	int	eatnum;
+	t_philos	*philo;
 
+	philo = (t_philos *)arg;
 	eatnum = philo->data->eat_num;
 	if ((philo->id % 2) == 0)
-		usleep(100);
-	while ((eatnum == -1 || philo->counter < eatnum ))
+		usleep(1000);
+	while (1)
 	{
+		pthread_mutex_lock(&philo->data->counter_mutex);
+		if ((eatnum != -1 && philo->counter < eatnum ))
+		{
+			pthread_mutex_unlock(&philo->data->counter_mutex);
+			break ;
+		}
+		pthread_mutex_unlock(&philo->data->counter_mutex);
 		pthread_mutex_lock(philo->death_mutex);
 		if (philo->data->deadbool == 1)
 		{
@@ -139,7 +149,7 @@ int	start_sim(t_data *args)
 NULL, routine, &args->philo[i]);
 		i++;
 	}
-	pthread_create(&args->monitoring, NULL, monitoring_thread, args);
+	pthread_create(&args->monitoring, NULL, (void *)monitoring_thread, args);
 	i = 0;
 	while (i < args->philo_num)
 	{
