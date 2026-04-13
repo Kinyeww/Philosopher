@@ -1,5 +1,16 @@
 #include "philosopher.h"
 #include <unistd.h>
+#include <sys/time.h>
+#include <time.h>
+
+void	ft_usleep(int time_to_sleep)
+{
+	long	start;
+
+	start = get_time_ms();
+	while ((get_time_ms() - start) < time_to_sleep)
+		usleep(500);
+}
 
 void	philo_eat(t_philos *philo)
 {

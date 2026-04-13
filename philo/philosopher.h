@@ -8,7 +8,6 @@ typedef struct s_data t_data;
 typedef struct s_philos
 {
 	int				id;
-	int				meals_eaten;
 	int				counter;
 	long			last_meal_time;
 	long			current_time;
@@ -45,6 +44,7 @@ int		check_num(char **av);
 long	get_time_ms(void);
 
 /* actions */
+void	ft_usleep(int time_to_sleep);
 void	philo_eat(t_philos *philo);
 void	philo_sleep(t_philos *philo);
 void	philo_think(t_philos *philo);

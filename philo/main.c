@@ -17,7 +17,6 @@ void	philo_init(t_data *args)
 	while (i < args->philo_num)
 	{
 		args->philo[i].id = i + 1;
-		args->philo[i].meals_eaten = 0;
 		args->philo[i].last_meal_time = args->start_time;
 		args->philo[i].counter = 0;
 		args->philo[i].data = args;
@@ -30,22 +29,50 @@ void	philo_init(t_data *args)
 	}
 }
 
+void	one_philo(t_philos *philo)
+{
+	pthread_mutex_lock(philo->l_fork);
+	print_status(philo, "has taken a fork");
+	ft_usleep(philo->data->t_die);
+	print_status(philo, "died");
+	pthread_mutex_unlock(philo->l_fork);
+}
+
 void	print_status(t_philos *philo, char *s)
 {
 	long	now;
 
+	pthread_mutex_lock(&philo->data->print_mutex);
 	pthread_mutex_lock(philo->death_mutex);
 	if (philo->data->deadbool == 1)
 	{
+		pthread_mutex_unlock(&philo->data->print_mutex);
 		pthread_mutex_unlock(philo->death_mutex);
 		return ;
 	}
 	pthread_mutex_unlock(philo->death_mutex);
 	now = get_time_ms();
 	philo->current_time = now - (philo->data->start_time);
-	pthread_mutex_lock(&philo->data->print_mutex);
 	printf("%ld %d %s\n\n", philo->current_time, philo->id, s);
 	pthread_mutex_unlock(&philo->data->print_mutex);
+}
+
+int	done_eat_count(t_data *args)
+{
+	int	i;
+	int	result;
+
+	i = 0;
+	result = 0;
+	while (i < args->philo_num)
+	{
+		pthread_mutex_lock(&args->counter_mutex);
+		if (args->philo[i].counter >= args->eat_num)
+			result++;
+		pthread_mutex_unlock(&args->counter_mutex);
+		i++;
+	}
+	return (result);
 }
 
 void	*monitoring_thread(t_data *args)
@@ -60,13 +87,8 @@ void	*monitoring_thread(t_data *args)
 	{
 		if (i == args->philo_num)
 			i = 0;
-		pthread_mutex_lock(&args->counter_mutex);
-		if (args->philo[i].counter == args->eat_num)
-		{
-			pthread_mutex_unlock(&args->counter_mutex);
+		if (args->eat_num != -1 && done_eat_count(args) == args->philo_num)
 			return (NULL);
-		}
-		pthread_mutex_unlock(&args->counter_mutex);
 		pthread_mutex_lock(&args->death_mutex);
 		current = get_time_ms();
 		pthread_mutex_lock(&args->meal_time_mutex);
@@ -101,7 +123,7 @@ void	*routine(void *arg)
 	while (1)
 	{
 		pthread_mutex_lock(&philo->data->counter_mutex);
-		if ((eatnum != -1 && philo->counter < eatnum ))
+		if ((eatnum != -1 && philo->counter >= eatnum ))
 		{
 			pthread_mutex_unlock(&philo->data->counter_mutex);
 			break ;
@@ -142,6 +164,11 @@ int	start_sim(t_data *args)
 	args->fork = malloc(sizeof(pthread_mutex_t) * (args->philo_num));
 	args->start_time = get_time_ms();
 	philo_init(args);
+	if (args->philo_num == 1)
+	{
+		one_philo(args->philo);
+		return (1);
+	}
 	i = 0;
 	while (i < args->philo_num)
 	{
