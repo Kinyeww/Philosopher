@@ -14,9 +14,6 @@ void	ft_usleep(int time_to_sleep)
 
 void	philo_eat(t_philos *philo)
 {
-	long	elapsed_time;
-	long	start_time;
-
 	if (philo->id % 2 == 0)
 	{
 		pthread_mutex_lock(philo->r_fork);
@@ -31,17 +28,11 @@ void	philo_eat(t_philos *philo)
 		pthread_mutex_lock(philo->r_fork);
 		print_status(philo, "has taken a fork");
 	}
-	start_time = get_time_ms();
-	elapsed_time = start_time;
 	pthread_mutex_lock(philo->meal_time_mutex);
 	philo->last_meal_time = get_time_ms();
 	pthread_mutex_unlock(philo->meal_time_mutex);
 	print_status(philo, "is eating");
-	while (elapsed_time - start_time < philo->data->t_eat)
-	{
-		usleep(100);
-		elapsed_time = get_time_ms();
-	}
+	ft_usleep(philo->data->t_eat);
 	pthread_mutex_unlock(philo->l_fork);
 	pthread_mutex_unlock(philo->r_fork);
 }

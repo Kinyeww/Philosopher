@@ -89,7 +89,6 @@ void	*monitoring_thread(t_data *args)
 			i = 0;
 		if (args->eat_num != -1 && done_eat_count(args) == args->philo_num)
 			return (NULL);
-		pthread_mutex_lock(&args->death_mutex);
 		current = get_time_ms();
 		pthread_mutex_lock(&args->meal_time_mutex);
 		compare = args->philo[i].last_meal_time;
@@ -98,14 +97,14 @@ void	*monitoring_thread(t_data *args)
 		if (result > (long)args->philo[i].data->t_die)
 		{
 			pthread_mutex_lock(&args->print_mutex);
+			pthread_mutex_lock(&args->death_mutex);
+			args->deadbool = 1;
+			pthread_mutex_unlock(args->philo[i].death_mutex);
 			printf("last eat time = %ldms, need within %dms\n", result, args->t_die);
 			printf("\x1B[31m%d is dead\n\x1B[0m", args->philo[i].id);
-			args->deadbool = 1;
 			pthread_mutex_unlock(&args->print_mutex);
-			pthread_mutex_unlock(args->philo[i].death_mutex);
 			return (NULL);
 		}
-		pthread_mutex_unlock(args->philo[i].death_mutex);
 		i++;
 		usleep (50);
 	}
