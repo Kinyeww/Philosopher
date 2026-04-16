@@ -44,10 +44,11 @@ int		check_num(char **av);
 long	get_time_ms(void);
 
 /* actions */
-void	ft_usleep(int time_to_sleep);
-void	philo_eat(t_philos *philo);
+int		ft_usleep(int time_to_sleep, t_philos *philo);
+int		philo_eat(t_philos *philo);
 void	philo_sleep(t_philos *philo);
 void	philo_think(t_philos *philo);
+void	one_philo(t_philos *philo);
 
 /* main */
 void	print_status(t_philos *philo, char *s);

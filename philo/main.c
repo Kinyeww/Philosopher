@@ -29,15 +29,6 @@ void	philo_init(t_data *args)
 	}
 }
 
-void	one_philo(t_philos *philo)
-{
-	pthread_mutex_lock(philo->l_fork);
-	print_status(philo, "has taken a fork");
-	ft_usleep(philo->data->t_die);
-	print_status(philo, "died");
-	pthread_mutex_unlock(philo->l_fork);
-}
-
 void	print_status(t_philos *philo, char *s)
 {
 	long	now;
@@ -94,7 +85,7 @@ void	*monitoring_thread(t_data *args)
 		compare = args->philo[i].last_meal_time;
 		result = current - compare;
 		pthread_mutex_unlock(&args->meal_time_mutex);
-		if (result > (long)args->philo[i].data->t_die)
+		if (result >= (long)args->philo[i].data->t_die)
 		{
 			pthread_mutex_lock(&args->print_mutex);
 			pthread_mutex_lock(&args->death_mutex);
@@ -135,10 +126,12 @@ void	*routine(void *arg)
 			break ;
 		}
 		pthread_mutex_unlock(philo->death_mutex);
-		philo_eat(philo);
-		pthread_mutex_lock(&philo->data->counter_mutex);
-		philo->counter++;
-		pthread_mutex_unlock(&philo->data->counter_mutex);
+		if (philo_eat(philo) == 0)
+		{
+			pthread_mutex_lock(&philo->data->counter_mutex);
+			philo->counter++;
+			pthread_mutex_unlock(&philo->data->counter_mutex);
+		}
 		philo_sleep(philo);
 		philo_think(philo);
 		usleep(1000);
@@ -183,6 +176,7 @@ NULL, routine, &args->philo[i]);
 		i++;
 	}
 	pthread_join(args->monitoring, NULL);
+	// philo_clean();
 	printf("\n---stopping simulator---\n");
 	printf("ended\n");
 	return (1);

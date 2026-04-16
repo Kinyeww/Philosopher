@@ -2,7 +2,7 @@ NAME = philo
 CC = cc
 CCFLAGS = -Wall -Wextra -Werror -g -pthread #-fsanitize=thread
 
-SRCS = main.c parsing_utils.c eat_sleep_think.c
+SRCS = main.c parsing_utils.c actions.c
 OBJS = $(SRCS:.c=.o)
 
 $(NAME): $(OBJS)
