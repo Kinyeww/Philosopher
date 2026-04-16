@@ -55,8 +55,8 @@ int	atoi_num(char **av, t_data *args)
 	if (args->philo_num < 1)
 		return (false);
 	args->t_die = ft_atoi(av[2]);
-	args->t_sleep = ft_atoi(av[3]);
-	args->t_eat = ft_atoi(av[4]);
+	args->t_eat = ft_atoi(av[3]);
+	args->t_sleep = ft_atoi(av[4]);
 	if (av[5])
 	{
 		args->eat_num = ft_atoi(av[5]);
