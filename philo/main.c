@@ -41,29 +41,23 @@ void	print_status(t_philos *philo, char *s)
 		pthread_mutex_unlock(philo->death_mutex);
 		return ;
 	}
-	pthread_mutex_unlock(philo->death_mutex);
 	now = get_time_ms();
 	philo->current_time = now - (philo->data->start_time);
-	printf("%ld %d %s\n\n", philo->current_time, philo->id, s);
+	printf("%ld %d %s\n", philo->current_time, philo->id, s);
+	pthread_mutex_unlock(philo->death_mutex);
 	pthread_mutex_unlock(&philo->data->print_mutex);
 }
 
 int	done_eat_count(t_data *args)
 {
 	int	i;
-	int	result;
 
 	i = 0;
-	result = 0;
-	while (i < args->philo_num)
-	{
-		pthread_mutex_lock(&args->counter_mutex);
-		if (args->philo[i].counter >= args->eat_num)
-			result++;
-		pthread_mutex_unlock(&args->counter_mutex);
-		i++;
-	}
-	return (result);
+	pthread_mutex_lock(&args->counter_mutex);
+	if (args->finished_count == args->philo_num)
+		i = args->philo_num;
+	pthread_mutex_unlock(&args->counter_mutex);
+	return (i);
 }
 
 void	*monitoring_thread(t_data *args)
@@ -80,6 +74,14 @@ void	*monitoring_thread(t_data *args)
 			i = 0;
 		if (args->eat_num != -1 && done_eat_count(args) == args->philo_num)
 			return (NULL);
+		pthread_mutex_lock(&args->counter_mutex);
+		if (args->philo[i].finished == 1)
+		{
+			pthread_mutex_unlock(&args->counter_mutex);
+			i++;
+			continue;
+		}
+		pthread_mutex_unlock(&args->counter_mutex);
 		current = get_time_ms();
 		pthread_mutex_lock(&args->meal_time_mutex);
 		compare = args->philo[i].last_meal_time;
@@ -90,9 +92,10 @@ void	*monitoring_thread(t_data *args)
 			pthread_mutex_lock(&args->print_mutex);
 			pthread_mutex_lock(&args->death_mutex);
 			args->deadbool = 1;
-			pthread_mutex_unlock(args->philo[i].death_mutex);
-			printf("last eat time = %ldms, need within %dms\n", result, args->t_die);
-			printf("\x1B[31m%d is dead\n\x1B[0m", args->philo[i].id);
+			// printf("last eat time = %ldms, need within %dms\n", result, args->t_die);
+			// printf("\x1B[31m%d is dead\n\x1B[0m", args->philo[i].id);
+			printf("%ld %d died\n", (get_time_ms() - args->start_time), args->philo[i].id);
+			pthread_mutex_unlock(&args->death_mutex);
 			pthread_mutex_unlock(&args->print_mutex);
 			return (NULL);
 		}
@@ -112,13 +115,6 @@ void	*routine(void *arg)
 		usleep(1000);
 	while (1)
 	{
-		pthread_mutex_lock(&philo->data->counter_mutex);
-		if ((eatnum != -1 && philo->counter >= eatnum ))
-		{
-			pthread_mutex_unlock(&philo->data->counter_mutex);
-			break ;
-		}
-		pthread_mutex_unlock(&philo->data->counter_mutex);
 		pthread_mutex_lock(philo->death_mutex);
 		if (philo->data->deadbool == 1)
 		{
@@ -130,11 +126,20 @@ void	*routine(void *arg)
 		{
 			pthread_mutex_lock(&philo->data->counter_mutex);
 			philo->counter++;
+			if ((eatnum != -1 && philo->counter >= eatnum ))
+			{
+				philo->finished = 1;
+				philo->data->finished_count++;
+				pthread_mutex_unlock(&philo->data->counter_mutex);
+				break ;
+			}
 			pthread_mutex_unlock(&philo->data->counter_mutex);
 		}
-		philo_sleep(philo);
-		philo_think(philo);
-		usleep(1000);
+		else
+			break ;
+		philo_sleep(philo, eatnum);
+		philo_think(philo, eatnum);
+		usleep(500);
 	}
 	return (NULL);
 }
@@ -177,8 +182,8 @@ NULL, routine, &args->philo[i]);
 	}
 	pthread_join(args->monitoring, NULL);
 	// philo_clean();
-	printf("\n---stopping simulator---\n");
-	printf("ended\n");
+	// printf("\n---stopping simulator---\n");
+	// printf("ended\n");
 	return (1);
 }
 

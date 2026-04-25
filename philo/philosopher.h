@@ -9,6 +9,7 @@ typedef struct s_philos
 {
 	int				id;
 	int				counter;
+	int				finished;
 	long			last_meal_time;
 	long			current_time;
 	pthread_t		thread_id;
@@ -28,6 +29,7 @@ typedef struct s_data
 	int				eat_num;
 	int				deadbool;
 	long			start_time;
+	int				finished_count;
 	pthread_mutex_t	death_mutex;
 	pthread_mutex_t	meal_time_mutex;
 	pthread_mutex_t	counter_mutex;
@@ -46,11 +48,11 @@ long	get_time_ms(void);
 /* actions */
 int		ft_usleep(int time_to_sleep, t_philos *philo);
 int		philo_eat(t_philos *philo);
-void	philo_sleep(t_philos *philo);
-void	philo_think(t_philos *philo);
+void	philo_sleep(t_philos *philo, int eatnum);
+void	philo_think(t_philos *philo, int eatnum);
 void	one_philo(t_philos *philo);
 
 /* main */
 void	print_status(t_philos *philo, char *s);
 
-#endif
+# endif
