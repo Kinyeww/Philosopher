@@ -1,4 +1,4 @@
-#include "philosopher.h"
+#include "../includes/philosopher.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>

@@ -1,4 +1,4 @@
-#include "philosopher.h"
+#include "../includes/philosopher.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -139,7 +139,6 @@ void	*routine(void *arg)
 			break ;
 		philo_sleep(philo, eatnum);
 		philo_think(philo, eatnum);
-		usleep(500);
 	}
 	return (NULL);
 }

@@ -1,4 +1,4 @@
-#include "philosopher.h"
+#include "../includes/philosopher.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -69,6 +69,8 @@ void	philo_sleep(t_philos *philo, int eatnum)
 
 void	philo_think(t_philos *philo, int eatnum)
 {
+	long	t_think;
+
 	pthread_mutex_lock(&philo->data->counter_mutex);
 	if ((eatnum != -1 && philo->counter >= eatnum ))
 	{
@@ -77,6 +79,12 @@ void	philo_think(t_philos *philo, int eatnum)
 	}
 	pthread_mutex_unlock(&philo->data->counter_mutex);
 	print_status(philo, "is thinking");
+	if (philo->data->philo_num % 2 == 0)
+		return ;
+	t_think = philo->data->t_eat * 2 - philo->data->t_sleep;
+	if (t_think < 0)
+	t_think = 0;
+	ft_usleep(t_think, philo);	
 }
 
 void	one_philo(t_philos *philo)
