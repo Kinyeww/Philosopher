@@ -63,7 +63,7 @@ void	cleanup(t_data *args);
 int		check_deadbool(t_philos *philo);
 int		done_eat_count(t_data *args);
 long	get_time_ms(void);
-void	wait_start(t_philos *philo);
+void	wait_start(t_data *args);
 void	*print_dead(t_data *args, int i);
 
 /* routine */

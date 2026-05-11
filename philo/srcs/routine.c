@@ -41,7 +41,7 @@ void	*routine(void *philo_arg)
 
 	philo = (t_philos *)philo_arg;
 	eatnum = philo->data->eat_num;
-	wait_start(philo);
+	wait_start(philo->data);
 	if ((philo->id % 2) == 0)
 		usleep(1000);
 	while (1)
