@@ -4,26 +4,6 @@
 
 static int	start_thread(t_data *args);
 
-void	cleanup(t_data *args)
-{
-	int	i;
-
-	i = 0;
-	while (i < args->philo_num)
-	{
-		pthread_mutex_destroy(&args->fork[i]);
-		i++;
-	}
-	pthread_mutex_destroy(&args->death_mutex);
-	pthread_mutex_destroy(&args->meal_time_mutex);
-	pthread_mutex_destroy(&args->counter_mutex);
-	pthread_mutex_destroy(&args->print_mutex);
-	pthread_mutex_destroy(&args->ready_mutex);
-	free(args->fork);
-	free(args->philo);
-	free(args);
-}
-
 int	start_sim(t_data *args)
 {
 	int				i;
@@ -103,4 +83,24 @@ static int	start_thread(t_data *args)
 	}
 	pthread_create(&args->monitoring, NULL, (void *)monitoring_thread, args);
 	return (0);
+}
+
+void	cleanup(t_data *args)
+{
+	int	i;
+
+	i = 0;
+	while (i < args->philo_num)
+	{
+		pthread_mutex_destroy(&args->fork[i]);
+		i++;
+	}
+	pthread_mutex_destroy(&args->death_mutex);
+	pthread_mutex_destroy(&args->meal_time_mutex);
+	pthread_mutex_destroy(&args->counter_mutex);
+	pthread_mutex_destroy(&args->print_mutex);
+	pthread_mutex_destroy(&args->ready_mutex);
+	free(args->fork);
+	free(args->philo);
+	free(args);
 }

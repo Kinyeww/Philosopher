@@ -12,6 +12,7 @@ void	*monitoring_thread(t_data *args)
 	int		i;
 
 	i = 0;
+	wait_start(args);
 	while (1)
 	{
 		if (i == args->philo_num)

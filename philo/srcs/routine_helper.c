@@ -34,17 +34,17 @@ long	get_time_ms(void)
 	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
-void	wait_start(t_philos *philo)
+void	wait_start(t_data *args)
 {
 	while (1)
 	{
-		pthread_mutex_lock(&philo->data->ready_mutex);
-		if (philo->data->ready == 1)
+		pthread_mutex_lock(&args->ready_mutex);
+		if (args->ready == 1)
 		{
-			pthread_mutex_unlock(&philo->data->ready_mutex);
+			pthread_mutex_unlock(&args->ready_mutex);
 			break ;
 		}
-		pthread_mutex_unlock(&philo->data->ready_mutex);
+		pthread_mutex_unlock(&args->ready_mutex);
 		usleep(100);
 	}
 }
