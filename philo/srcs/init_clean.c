@@ -30,11 +30,11 @@ int	start_sim(t_data *args)
 
 	args->philo = malloc(sizeof(t_philos) * (args->philo_num));
 	args->fork = malloc(sizeof(pthread_mutex_t) * (args->philo_num));
-	args->start_time = get_time_ms();
 	philo_init(args);
 	if (start_thread(args) == 1)
 		return (1);
 	pthread_mutex_lock(&args->ready_mutex);
+	args->start_time = get_time_ms();
 	args->ready = 1;
 	pthread_mutex_unlock(&args->ready_mutex);
 	i = 0;
