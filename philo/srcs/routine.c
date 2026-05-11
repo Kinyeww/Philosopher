@@ -1,4 +1,4 @@
-#include "../includes/philosopher.h"
+#include "philosopher.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +13,7 @@ void	*monitoring_thread(t_data *args)
 
 	i = 0;
 	wait_start(args);
+	usleep(500);
 	while (1)
 	{
 		if (i == args->philo_num)
@@ -42,6 +43,7 @@ void	*routine(void *philo_arg)
 	philo = (t_philos *)philo_arg;
 	eatnum = philo->data->eat_num;
 	wait_start(philo->data);
+	philo->last_meal_time = philo->data->start_time;
 	if ((philo->id % 2) == 0)
 		usleep(1000);
 	while (1)

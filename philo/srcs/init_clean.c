@@ -1,4 +1,4 @@
-#include "../includes/philosopher.h"
+#include "philosopher.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -50,7 +50,6 @@ void	philo_init(t_data *args)
 	while (i < args->philo_num)
 	{
 		args->philo[i].id = i + 1;
-		args->philo[i].last_meal_time = args->start_time;
 		args->philo[i].counter = 0;
 		args->philo[i].data = args;
 		args->philo[i].meal_time_mutex = &args->meal_time_mutex;
