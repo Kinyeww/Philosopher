@@ -32,6 +32,7 @@ void	*monitoring_thread(void *arg)
 		if (result >= (long)args->philo[i].data->t_die)
 			return (print_dead(args, i));
 		i++;
+		usleep(1000);
 	}
 }
 
