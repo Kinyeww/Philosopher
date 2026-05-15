@@ -50,6 +50,7 @@ void	philo_think(t_philos *philo, int eatnum);
 /*main*/
 int		start_sim(t_data *args);
 long	get_time_ms(void);
+void	philo_stagger(t_philos *philo);
 
 /* parsing */
 int		atoi_num(char **av, t_data *args);

@@ -79,7 +79,10 @@ void	philo_think(t_philos *philo, int eatnum)
 	print_status(philo, "is thinking");
 	if (philo->data->philo_num % 2 == 0)
 		return ;
-	t_think = (philo->data->t_eat * 2 - philo->data->t_sleep) / 2;
+	pthread_mutex_lock(&philo->data->meal_time_mutex);
+	t_think = (philo->data->t_die - (get_time_ms() - philo->last_meal_time)
+			- philo->data->t_eat) / 2;
+	pthread_mutex_unlock(&philo->data->meal_time_mutex);
 	if (t_think < 0)
 		t_think = 0;
 	ft_usleep(t_think, philo);

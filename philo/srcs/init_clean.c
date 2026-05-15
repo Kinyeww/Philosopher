@@ -58,7 +58,7 @@ int	start_thread(t_data *args)
 		i++;
 	}
 	if (pthread_create(&args->monitoring, NULL,
-			(void *)monitoring_thread, args))
+			monitoring_thread, args))
 		return (1);
 	return (0);
 }

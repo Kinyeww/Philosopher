@@ -32,7 +32,6 @@ void	*monitoring_thread(void *arg)
 		if (result >= (long)args->philo[i].data->t_die)
 			return (print_dead(args, i));
 		i++;
-		usleep(1000);
 	}
 }
 
@@ -44,8 +43,7 @@ void	*routine(void *philo_arg)
 	philo = (t_philos *)philo_arg;
 	eatnum = philo->data->eat_num;
 	wait_start(philo->data);
-	if ((philo->id % 2) == 0)
-		usleep(500);
+	philo_stagger(philo);
 	while (1)
 	{
 		if (check_deadbool(philo) == 1)
