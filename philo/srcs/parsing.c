@@ -3,6 +3,29 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+static int	ft_atoi(char *s);
+
+int	parsing_check(int ac, char **av, t_data *args)
+{
+	if (ac < 5 || ac > 6)
+	{
+		printf("Error, Usage: <num_of_philo> <time_to_die> <time_to_eat>\
+			<time_to_sleep> <number_of_times_to_eat>\n");
+		return (false);
+	}
+	if (!(check_num(av)))
+	{
+		printf("error: invalid num detected\n");
+		return (false);
+	}
+	if (!(atoi_num(av, args)))
+	{
+		printf("error: argument error\n");
+		return (false);
+	}
+	return (true);
+}
+
 static int	ft_atoi(char *s)
 {
 	long	res;
@@ -49,12 +72,14 @@ int	atoi_num(char **av, t_data *args)
 	args->t_die = ft_atoi(av[2]);
 	args->t_eat = ft_atoi(av[3]);
 	args->t_sleep = ft_atoi(av[4]);
-	if (args->philo_num < 1 || args->t_die < 0
-		|| args->t_eat < 0 || args->t_sleep < 0)
+	if (args->philo_num < 1 || args->t_die < 1
+		|| args->t_eat < 1 || args->t_sleep < 1)
 		return (false);
 	if (av[5])
 	{
 		args->eat_num = ft_atoi(av[5]);
+		if (args->eat_num < 1)
+			return (false);
 		return (true);
 	}
 	else
@@ -62,25 +87,4 @@ int	atoi_num(char **av, t_data *args)
 		args->eat_num = -1;
 		return (true);
 	}
-}
-
-int	parsing_check(int ac, char **av, t_data *args)
-{
-	if (ac < 5 || ac > 6)
-	{
-		printf("Error, Usage: <num_of_philo> <time_to_die> <time_to_eat>\
-			<time_to_sleep> <number_of_times_to_eat>\n");
-		return (false);
-	}
-	if (!(check_num(av)))
-	{
-		printf("error: invalid num detected\n");
-		return (false);
-	}
-	if (!(atoi_num(av, args)))
-	{
-		printf("error: argument error\n");
-		return (false);
-	}
-	return (true);
 }

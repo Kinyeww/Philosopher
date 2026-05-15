@@ -13,7 +13,7 @@ int	ft_usleep(int time_to_sleep, t_philos *philo)
 	{
 		if (check_deadbool(philo) == 1)
 			return (1);
-		usleep(3000);
+		usleep(250);
 	}
 	return (0);
 }
@@ -23,15 +23,15 @@ static void	take_fork(t_philos *philo)
 	if (philo->id % 2 == 0)
 	{
 		pthread_mutex_lock(philo->r_fork);
-		print_status(philo, "has taken a fork");
 		pthread_mutex_lock(philo->l_fork);
+		print_status(philo, "has taken a fork");
 		print_status(philo, "has taken a fork");
 	}
 	else
 	{
 		pthread_mutex_lock(philo->l_fork);
-		print_status(philo, "has taken a fork");
 		pthread_mutex_lock(philo->r_fork);
+		print_status(philo, "has taken a fork");
 		print_status(philo, "has taken a fork");
 	}
 }

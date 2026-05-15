@@ -2,7 +2,7 @@ NAME = philo
 CC = cc
 CCFLAGS = -Wall -Wextra -Werror -g -I./includes -pthread #-fsanitize=thread
 
-SRCS = srcs/main.c srcs/parsing_utils.c srcs/actions.c srcs/routine.c srcs/routine_helper.c srcs/init_clean.c
+SRCS = srcs/main.c srcs/parsing.c srcs/actions.c srcs/routine.c srcs/routine_helper.c srcs/init_clean.c
 OBJS = $(SRCS:.c=.o)
 
 $(NAME): $(OBJS)

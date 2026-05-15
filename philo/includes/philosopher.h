@@ -47,6 +47,10 @@ int		philo_eat(t_philos *philo);
 void	philo_sleep(t_philos *philo, int eatnum);
 void	philo_think(t_philos *philo, int eatnum);
 
+/*main*/
+int		start_sim(t_data *args);
+long	get_time_ms(void);
+
 /* parsing */
 int		atoi_num(char **av, t_data *args);
 int		parsing_check(int ac, char **av, t_data *args);
@@ -54,21 +58,21 @@ int		check_num(char **av);
 
 /* init_clean */
 void	print_status(t_philos *philo, char *s);
+int		start_thread(t_data *args);
 void	philo_init(t_data *args);
-int		start_sim(t_data *args);
 void	cleanup(t_data *args);
-
+void	set_last_meal_time(t_data *args);
 
 /* routine_helper */
 int		check_deadbool(t_philos *philo);
 int		done_eat_count(t_data *args);
-long	get_time_ms(void);
 void	wait_start(t_data *args);
 void	*print_dead(t_data *args, int i);
+void	sleep_and_reset_index(int *i);
 
 /* routine */
-void	*monitoring_thread(t_data *arg);
-void	*routine(void *arg);
+void	*monitoring_thread(void *arg);
+void	*routine(void *philo_arg);
 void	print_status(t_philos *philo, char *s);
 void	one_philo(t_philos *philo);
 

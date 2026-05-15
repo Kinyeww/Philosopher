@@ -1,6 +1,4 @@
 #include "philosopher.h"
-#include <sys/time.h>
-#include <time.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -24,14 +22,6 @@ int	done_eat_count(t_data *args)
 		i = args->philo_num;
 	pthread_mutex_unlock(&args->counter_mutex);
 	return (i);
-}
-
-long	get_time_ms(void)
-{
-	struct timeval	time;
-
-	gettimeofday(&time, NULL);
-	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
 void	wait_start(t_data *args)
@@ -59,4 +49,10 @@ void	*print_dead(t_data *args, int i)
 	pthread_mutex_unlock(&args->death_mutex);
 	pthread_mutex_unlock(&args->print_mutex);
 	return (NULL);
+}
+
+void	sleep_and_reset_index(int *i)
+{
+	*i = 0;
+	usleep(500);
 }

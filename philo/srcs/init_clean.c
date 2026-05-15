@@ -2,32 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int	start_thread(t_data *args);
-
-int	start_sim(t_data *args)
-{
-	int				i;
-
-	args->philo = malloc(sizeof(t_philos) * (args->philo_num));
-	args->fork = malloc(sizeof(pthread_mutex_t) * (args->philo_num));
-	philo_init(args);
-	if (start_thread(args) == 1)
-		return (1);
-	pthread_mutex_lock(&args->ready_mutex);
-	args->start_time = get_time_ms();
-	args->ready = 1;
-	pthread_mutex_unlock(&args->ready_mutex);
-	i = 0;
-	while (i < args->philo_num)
-	{
-		pthread_join(args->philo[i].thread_id, NULL);
-		i++;
-	}
-	pthread_join(args->monitoring, NULL);
-	cleanup(args);
-	return (1);
-}
-
 void	one_philo(t_philos *philo)
 {
 	pthread_mutex_lock(philo->l_fork);
@@ -41,30 +15,32 @@ void	philo_init(t_data *args)
 {
 	int	i;
 
-	i = 0;
+	i = -1;
 	pthread_mutex_init(&args->death_mutex, NULL);
 	pthread_mutex_init(&args->meal_time_mutex, NULL);
 	pthread_mutex_init(&args->counter_mutex, NULL);
 	pthread_mutex_init(&args->print_mutex, NULL);
 	pthread_mutex_init(&args->ready_mutex, NULL);
-	while (i < args->philo_num)
+	while (++i < args->philo_num)
 	{
 		args->philo[i].id = i + 1;
 		args->philo[i].counter = 0;
 		args->philo[i].data = args;
+		args->philo[i].finished = 0;
+		args->philo[i].last_meal_time = get_time_ms();
 		args->philo[i].meal_time_mutex = &args->meal_time_mutex;
 		args->philo[i].death_mutex = &args->death_mutex;
 		pthread_mutex_init(&args->fork[i], NULL);
 		args->philo[i].l_fork = &args->fork[i];
 		args->philo[i].r_fork = &args->fork[(i + 1) % args->philo_num];
-		i++;
 	}
 	args->deadbool = 0;
 	args->finished_count = 0;
 	args->ready = 0;
+	args->start_time = get_time_ms();
 }
 
-static int	start_thread(t_data *args)
+int	start_thread(t_data *args)
 {
 	int	i;
 
@@ -76,11 +52,14 @@ static int	start_thread(t_data *args)
 	i = 0;
 	while (i < args->philo_num)
 	{
-		pthread_create(&args->philo[i].thread_id,
-			NULL, routine, &args->philo[i]);
+		if (pthread_create(&args->philo[i].thread_id,
+				NULL, routine, &args->philo[i]) != 0)
+			return (1);
 		i++;
 	}
-	pthread_create(&args->monitoring, NULL, (void *)monitoring_thread, args);
+	if (pthread_create(&args->monitoring, NULL,
+			(void *)monitoring_thread, args))
+		return (1);
 	return (0);
 }
 
@@ -102,4 +81,16 @@ void	cleanup(t_data *args)
 	free(args->fork);
 	free(args->philo);
 	free(args);
+}
+
+void	set_last_meal_time(t_data *args)
+{
+	int	i;
+
+	i = 0;
+	while (i < args->philo_num)
+	{
+		args->philo[i].last_meal_time = args->start_time;
+		i++;
+	}
 }

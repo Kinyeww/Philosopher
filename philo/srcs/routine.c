@@ -6,18 +6,19 @@
 static int	check_finished(t_data *args, int i);
 static int	check_eatnum(t_philos *philo, int eatnum);
 
-void	*monitoring_thread(t_data *args)
+void	*monitoring_thread(void *arg)
 {
 	long	result;
 	int		i;
+	t_data	*args;
 
+	args = (t_data *)arg;
 	i = 0;
 	wait_start(args);
-	usleep(500);
 	while (1)
 	{
 		if (i == args->philo_num)
-			i = 0;
+			sleep_and_reset_index(&i);
 		if (args->eat_num != -1 && done_eat_count(args) == args->philo_num)
 			return (NULL);
 		if (check_finished(args, i) == 1)
@@ -31,7 +32,6 @@ void	*monitoring_thread(t_data *args)
 		if (result >= (long)args->philo[i].data->t_die)
 			return (print_dead(args, i));
 		i++;
-		usleep (50);
 	}
 }
 
@@ -43,9 +43,8 @@ void	*routine(void *philo_arg)
 	philo = (t_philos *)philo_arg;
 	eatnum = philo->data->eat_num;
 	wait_start(philo->data);
-	philo->last_meal_time = philo->data->start_time;
 	if ((philo->id % 2) == 0)
-		usleep(1000);
+		usleep(500);
 	while (1)
 	{
 		if (check_deadbool(philo) == 1)
@@ -71,8 +70,8 @@ void	print_status(t_philos *philo, char *s)
 	pthread_mutex_lock(philo->death_mutex);
 	if (philo->data->deadbool == 1)
 	{
-		pthread_mutex_unlock(&philo->data->print_mutex);
 		pthread_mutex_unlock(philo->death_mutex);
+		pthread_mutex_unlock(&philo->data->print_mutex);
 		return ;
 	}
 	now = get_time_ms();
