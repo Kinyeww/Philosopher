@@ -34,9 +34,19 @@ static void	take_fork(t_philos *philo)
 
 int	philo_eat(t_philos *philo)
 {
+	long	now;
+
 	take_fork(philo);
 	pthread_mutex_lock(philo->meal_time_mutex);
-	philo->last_meal_time = get_time_ms();
+	now = get_time_ms();
+	if (now - philo->last_meal_time >= (long)philo->data->t_die)
+	{
+		pthread_mutex_unlock(philo->meal_time_mutex);
+		pthread_mutex_unlock(philo->l_fork);
+		pthread_mutex_unlock(philo->r_fork);
+		return (0);
+	}
+	philo->last_meal_time = now;
 	pthread_mutex_unlock(philo->meal_time_mutex);
 	print_status(philo, "has taken a fork");
 	print_status(philo, "has taken a fork");
