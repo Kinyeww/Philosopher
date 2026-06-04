@@ -17,7 +17,6 @@ void	philo_init(t_data *args)
 
 	i = -1;
 	pthread_mutex_init(&args->death_mutex, NULL);
-	pthread_mutex_init(&args->meal_time_mutex, NULL);
 	pthread_mutex_init(&args->counter_mutex, NULL);
 	pthread_mutex_init(&args->print_mutex, NULL);
 	pthread_mutex_init(&args->ready_mutex, NULL);
@@ -28,7 +27,7 @@ void	philo_init(t_data *args)
 		args->philo[i].data = args;
 		args->philo[i].finished = 0;
 		args->philo[i].last_meal_time = get_time_ms();
-		args->philo[i].meal_time_mutex = &args->meal_time_mutex;
+		pthread_mutex_init(&args->philo[i].meal_time_mutex, NULL);
 		args->philo[i].death_mutex = &args->death_mutex;
 		pthread_mutex_init(&args->fork[i], NULL);
 		args->philo[i].l_fork = &args->fork[i];
@@ -71,10 +70,10 @@ void	cleanup(t_data *args)
 	while (i < args->philo_num)
 	{
 		pthread_mutex_destroy(&args->fork[i]);
+		pthread_mutex_destroy(&args->philo[i].meal_time_mutex);
 		i++;
 	}
 	pthread_mutex_destroy(&args->death_mutex);
-	pthread_mutex_destroy(&args->meal_time_mutex);
 	pthread_mutex_destroy(&args->counter_mutex);
 	pthread_mutex_destroy(&args->print_mutex);
 	pthread_mutex_destroy(&args->ready_mutex);

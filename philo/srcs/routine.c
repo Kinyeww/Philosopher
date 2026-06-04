@@ -26,9 +26,9 @@ void	*monitoring_thread(void *arg)
 			i++;
 			continue ;
 		}
-		pthread_mutex_lock(&args->meal_time_mutex);
+		pthread_mutex_lock(&args->philo[i].meal_time_mutex);
 		result = get_time_ms() - args->philo[i].last_meal_time;
-		pthread_mutex_unlock(&args->meal_time_mutex);
+		pthread_mutex_unlock(&args->philo[i].meal_time_mutex);
 		if (result >= (long)args->philo[i].data->t_die)
 			return (print_dead(args, i));
 		i++;

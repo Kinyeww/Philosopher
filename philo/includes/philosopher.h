@@ -3,7 +3,7 @@
 
 # include <pthread.h>
 
-typedef struct	s_data	t_data;
+typedef struct s_data	t_data;
 
 typedef struct s_philos
 {
@@ -13,9 +13,9 @@ typedef struct s_philos
 	long			last_meal_time;
 	long			current_time;
 	pthread_t		thread_id;
+	pthread_mutex_t	meal_time_mutex;
 	pthread_mutex_t	*l_fork;
 	pthread_mutex_t	*r_fork;
-	pthread_mutex_t	*meal_time_mutex;
 	pthread_mutex_t	*death_mutex;
 	t_data			*data;
 }	t_philos;
@@ -32,7 +32,6 @@ typedef struct s_data
 	long			start_time;
 	int				finished_count;
 	pthread_mutex_t	death_mutex;
-	pthread_mutex_t	meal_time_mutex;
 	pthread_mutex_t	counter_mutex;
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	ready_mutex;
@@ -41,21 +40,17 @@ typedef struct s_data
 	pthread_t		monitoring;
 }	t_data;
 
-/* actions */
+/* actions helper */
 int		ft_usleep(int time_to_sleep, t_philos *philo);
-int		philo_eat(t_philos *philo);
-void	philo_sleep(t_philos *philo, int eatnum);
-void	philo_think(t_philos *philo, int eatnum);
-
-/*main*/
-int		start_sim(t_data *args);
+void	take_fork(t_philos *philo);
+int		set_meal_time(t_philos *philo);
 long	get_time_ms(void);
 void	philo_stagger(t_philos *philo);
 
-/* parsing */
-int		atoi_num(char **av, t_data *args);
-int		parsing_check(int ac, char **av, t_data *args);
-int		check_num(char **av);
+/* actions */
+int		philo_eat(t_philos *philo);
+void	philo_sleep(t_philos *philo, int eatnum);
+void	philo_think(t_philos *philo, int eatnum);
 
 /* init_clean */
 void	print_status(t_philos *philo, char *s);
@@ -63,6 +58,14 @@ int		start_thread(t_data *args);
 void	philo_init(t_data *args);
 void	cleanup(t_data *args);
 void	set_last_meal_time(t_data *args);
+
+/* main */
+int		start_sim(t_data *args);
+
+/* parsing */
+int		atoi_num(char **av, t_data *args);
+int		parsing_check(int ac, char **av, t_data *args);
+int		check_num(char **av);
 
 /* routine_helper */
 int		check_deadbool(t_philos *philo);

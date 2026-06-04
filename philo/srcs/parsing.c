@@ -37,7 +37,7 @@ static int	ft_atoi(char *s)
 	{
 		if (res > (2147483647 - (*s - '0')) / 10)
 			return (-1);
-		res = (res * 10) + (*s -'0');
+		res = (res * 10) + (*s - '0');
 		s++;
 	}
 	return ((int)res);
