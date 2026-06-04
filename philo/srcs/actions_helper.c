@@ -1,4 +1,7 @@
 #include "philosopher.h"
+#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
 
 int	ft_usleep(int time_to_sleep, t_philos *philo)
 {
